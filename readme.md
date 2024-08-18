@@ -100,7 +100,7 @@ Before you begin, ensure you have the following installed:
    cd server
    npm run dev
    ```
-   The server will start on http://localhost:3000
+   The server will start on `http://localhost:3000`
 
 2. In a new terminal, start the client development server:
    ```sh
