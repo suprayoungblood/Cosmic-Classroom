@@ -18,7 +18,6 @@
 </p>
 <p align="center">
 	<img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat&logo=JavaScript&logoColor=black" alt="JavaScript">
-	<img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat&logo=TypeScript&logoColor=white" alt="TypeScript">
 	<img src="https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=React&logoColor=black" alt="React">
 	<img src="https://img.shields.io/badge/Vite-646CFF.svg?style=flat&logo=Vite&logoColor=white" alt="Vite">
     <br>
@@ -52,10 +51,11 @@ Cosmic Classroom is an interactive space education application that leverages AI
 ## ✨ Features
 
 - AI-powered Q&A system for space-related topics
-- React-based frontend for a responsive user interface
+- React-based frontend with Vite for fast development and building
 - Express.js backend integrated with OpenAI's GPT model
 - Rate limiting to prevent API abuse
 - Error handling for a smooth user experience
+- Responsive design using Tailwind CSS and Material Tailwind components
 
 ---
 
@@ -138,6 +138,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - OpenAI for providing the AI model
 - The Vite and React teams for their excellent development tools
+- Material Tailwind for the UI components
 
 [**Return to Top**](#-quick-links)
 
