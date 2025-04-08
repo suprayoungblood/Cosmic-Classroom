@@ -1,0 +1,71 @@
+services:
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      # Access from outside Docker (browser on host) use localhost
+      - VITE_API_URL=http://localhost:3000/api
+    # Enable hot reload
+    stdin_open: true
+    tty: true
+    networks:
+      - cosmic-network
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key}
+      - PORT=${PORT:-3000}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_NAME=${DB_NAME:-cosmic_classroom}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - JWT_SECRET=cosmic-classroom-dev-secret-key-2025-04-05
+    depends_on:
+      db:
+        condition: service_healthy
+    # Enable hot reload
+    stdin_open: true
+    tty: true
+    networks:
+      - cosmic-network
+    
+  db:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cosmic_classroom
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cosmic-network
+
+volumes:
+  postgres_data:
+
+networks:
+  cosmic-network:
+    driver: bridge

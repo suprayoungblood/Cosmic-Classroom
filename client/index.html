@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/img/cosmic-classroom-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Cosmic Classroom - Interactive space education platform for exploring the universe and learning about astronomy" />
+    <meta name="theme-color" content="#111827" />
+    <title>Cosmic Classroom | Explore the Universe</title>
+    
+    <!-- Modern Font Stack -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    
+    <!-- Base Styles and Fixes -->
+    <link rel="stylesheet" href="/css/fix.css" />
+    
+    <style>
+      /* Critical CSS for initial render */
+      html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+        position: relative !important;
+        scroll-behavior: smooth;
+        background-color: #111827;
+        color: #F9FAFB;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+      
+      /* Improve perceived performance with content-visibility */
+      section {
+        content-visibility: auto;
+      }
+      
+      /* Modern scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1F2937;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3B82F6;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #2563EB;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Preload key images for better performance -->
+    <link rel="preload" as="image" href="/img/Space.avif" />
+  </body>
+</html>

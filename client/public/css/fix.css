@@ -1,0 +1,11 @@
+html, body {
+  overflow-y: auto !important;
+  height: auto !important;
+  position: relative !important;
+  scroll-behavior: smooth;
+}
+
+/* Make sure modals don't prevent scrolling */
+.fixed {
+  position: absolute !important;
+}

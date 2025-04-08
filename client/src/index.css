@@ -1,0 +1,291 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  html {
+    @apply antialiased text-cosmic-text-primary;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    background-color: theme('colors.cosmic.background');
+  }
+  
+  body {
+    @apply overflow-y-auto font-sans min-h-screen;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-cosmic-text-primary tracking-tight;
+  }
+  
+  p {
+    @apply text-cosmic-text-secondary leading-relaxed;
+  }
+  
+  a {
+    @apply text-cosmic-primary transition-all duration-200;
+  }
+  
+  ::selection {
+    @apply bg-cosmic-primary/20 text-cosmic-text-primary;
+  }
+}
+
+/* Custom components */
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply relative inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-cosmic-background;
+  }
+  
+  .btn-primary {
+    @apply btn bg-cosmic-primary hover:bg-cosmic-primary/90 text-white focus:ring-cosmic-primary/50;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-cosmic-secondary hover:bg-cosmic-secondary/90 text-white focus:ring-cosmic-secondary/50;
+  }
+  
+  .btn-outline {
+    @apply btn border border-cosmic-border bg-transparent hover:bg-white/5 text-cosmic-text-primary;
+  }
+  
+  /* Card styles */
+  .cosmic-card {
+    @apply bg-cosmic-surface border border-cosmic-border/60 rounded-xl shadow-cosmic overflow-hidden transition-all duration-200;
+  }
+  
+  .cosmic-card-hover {
+    @apply hover:shadow-cosmic-lg hover:border-cosmic-border/80 hover:-translate-y-1;
+  }
+  
+  /* Input styles */
+  .cosmic-input {
+    @apply w-full px-4 py-2 bg-cosmic-surface/60 border border-cosmic-border rounded-lg text-cosmic-text-primary placeholder:text-cosmic-text-muted focus:outline-none focus:ring-2 focus:ring-cosmic-primary/40 focus:border-cosmic-primary/40 transition-all duration-200;
+  }
+  
+  /* Section styles */
+  .cosmic-section {
+    @apply relative py-16 md:py-24 overflow-hidden;
+  }
+  
+  /* Container styles */
+  .cosmic-container {
+    @apply container mx-auto px-4 sm:px-6 relative z-10;
+  }
+  
+  /* Badge styles */
+  .cosmic-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .cosmic-badge-primary {
+    @apply cosmic-badge bg-cosmic-primary/10 text-cosmic-primary;
+  }
+  
+  .cosmic-badge-secondary {
+    @apply cosmic-badge bg-cosmic-secondary/10 text-cosmic-secondary;
+  }
+
+  /* Shadow for cards */
+  .shadow-cosmic {
+    @apply shadow-lg shadow-cosmic-primary/5;
+  }
+
+  /* Q&A styles */
+  .cosmic-answer {
+    @apply max-w-none space-y-4 text-cosmic-text-primary;
+  }
+
+  .cosmic-suggested-question {
+    @apply text-left text-cosmic-text-secondary hover:text-cosmic-primary hover:border-cosmic-primary bg-cosmic-background/30;
+  }
+  
+  /* Fix for form required field indicators */
+  .cosmic-form-field {
+    @apply relative;
+  }
+  
+  .cosmic-form-field .text-red-500,
+  .cosmic-form-field .text-red-600,
+  .cosmic-form-field .text-red-400,
+  [class*="text-red-"] {
+    @apply text-cosmic-primary !important;
+  }
+  
+  /* Fix Material Tailwind form indicators to use our theme colors */
+  .peer:required + .peer-required\:after\:content-\[\'\*\'\] {
+    @apply after:text-cosmic-primary after:content-['*'] after:ml-0.5;
+  }
+  
+  /* Remove the default red asterisk */
+  .peer:required + .peer-required\:after\:text-red-500 {
+    @apply after:text-cosmic-primary !important;
+  }
+  
+  /* Loading animation for space theme */
+  .cosmic-loading {
+    @apply relative w-24 h-24;
+  }
+  
+  .cosmic-planet {
+    @apply absolute h-8 w-8 bg-cosmic-primary rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse-slow;
+  }
+  
+  .cosmic-orbit {
+    @apply absolute top-0 left-0 w-24 h-24 border border-cosmic-border/30 rounded-full animate-spin;
+    animation-duration: 3s;
+  }
+  
+  .cosmic-satellite {
+    @apply absolute h-3 w-3 bg-cosmic-secondary rounded-full top-0 left-1/2 -translate-x-1/2;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  /* Glass effect */
+  .cosmic-glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+  
+  /* Text gradient */
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-cosmic-gradient;
+  }
+  
+  /* Animations */
+  .animate-float {
+    animation: floating 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  /* Mars-like stars (updated, more realistic stars) */
+  .cosmic-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: 
+      radial-gradient(1px 1px at 10% 10%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 20% 50%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 30% 30%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 40% 70%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 50% 40%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 60% 80%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 70% 20%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 80% 60%, rgba(255, 255, 255, 0.8) 50%, transparent 100%),
+      radial-gradient(1px 1px at 90% 90%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+    opacity: 0.15;
+    background-size: 200% 200%;
+  }
+  
+  /* Galaxies/nebulae */
+  .cosmic-nebula {
+    position: absolute;
+    filter: blur(40px);
+    opacity: 0.06;
+    border-radius: 100%;
+    z-index: 0;
+    background-image: radial-gradient(circle at center, var(--color-center) 0%, var(--color-middle) 50%, var(--color-edge) 100%);
+  }
+  
+  .cosmic-nebula-blue {
+    --color-center: rgba(59, 130, 246, 0.7);
+    --color-middle: rgba(59, 130, 246, 0.2);
+    --color-edge: rgba(59, 130, 246, 0);
+  }
+  
+  .cosmic-nebula-teal {
+    --color-center: rgba(16, 185, 129, 0.7);
+    --color-middle: rgba(16, 185, 129, 0.2);
+    --color-edge: rgba(16, 185, 129, 0);
+  }
+  
+  .cosmic-nebula-purple {
+    --color-center: rgba(139, 92, 246, 0.7);
+    --color-middle: rgba(139, 92, 246, 0.2);
+    --color-edge: rgba(139, 92, 246, 0);
+  }
+  
+  .cosmic-nebula-amber {
+    --color-center: rgba(245, 158, 11, 0.7);
+    --color-middle: rgba(245, 158, 11, 0.2);
+    --color-edge: rgba(245, 158, 11, 0);
+  }
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.cosmic.surface');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.cosmic.primary');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.cosmic.primary');
+  opacity: 0.8;
+}
+
+/* Override any element that might prevent scrolling */
+.fixed, 
+[data-overlayscrollbars-initialize], 
+[data-overlayscrollbars] {
+  position: absolute !important;
+}
+
+.fixed.inset-0 {
+  position: fixed !important;
+  z-index: 50;
+}
+
+/* Ensure overflow is not hidden */
+body:has(.overflow-hidden) {
+  overflow: auto !important;
+}
+
+/* Keyframes */
+@keyframes floating {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Reduced motion preference support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    animation-delay: 0.01ms !important;
+  }
+}

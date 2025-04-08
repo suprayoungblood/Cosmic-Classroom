@@ -1,0 +1,21 @@
+/* Fix for the chat page and navbar interaction issues */
+
+/* Ensure chat page doesn't block navbar interactions */
+.cosmic-chat-container * {
+  pointer-events: auto;
+}
+
+/* Increase navbar z-index to be above all other elements */
+nav {
+  z-index: 1000 !important; /* Override any other z-index values */
+}
+
+/* Add this class to body to prevent any pointer-events issues */
+body.chat-page-active {
+  pointer-events: auto;
+}
+
+/* Fix for any decorative elements that might be overlapping */
+.cosmic-decorative-element {
+  pointer-events: none !important;
+}
