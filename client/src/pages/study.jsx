@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { PageTitle } from "@/widgets/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGame } from "@/contexts/GameContext";
@@ -34,10 +34,40 @@ export function StudyPage() {
   const [activeTab, setActiveTab] = useState("courses");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [completedLessons, setCompletedLessons] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const refreshTimeoutRef = useRef(null);
 
-  // Fetch game data on page load
+  // Fetch game data on page load with debounce to prevent flickering
   useEffect(() => {
-    refreshGameData();
+    setIsLoading(true);
+
+    // Clear any existing timeout to prevent multiple calls
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Set a timeout to delay fetch so we don't make too many API calls
+    refreshTimeoutRef.current = setTimeout(() => {
+      // Use a wrapper function to prevent state flicker
+      const fetchData = async () => {
+        try {
+          await refreshGameData();
+        } catch (err) {
+          console.error('Error fetching game data:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchData();
+    }, 1000);
+
+    // Clean up timeout when component unmounts
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
   }, [refreshGameData]);
 
   // Topics to study based on space categories
@@ -259,6 +289,33 @@ export function StudyPage() {
     return Math.round((completedCount / totalLessons) * 100);
   };
 
+  // Custom PageTitle component with all required props to fix PropType validation errors
+  const CustomPageTitle = ({ title, children }) => (
+    <PageTitle 
+      section="Education" 
+      heading={title}
+      className="mb-8"
+    >
+      {children}
+    </PageTitle>
+  );
+
+  // Show loading state while data is being fetched to prevent UI flicker
+  if (isLoading && !gameData) {
+    return (
+      <div className="cosmic-container relative min-h-screen">
+        <div className="pt-28 pb-12 relative z-10 flex justify-center items-center">
+          <div className="text-center">
+            <AcademicCapIcon className="h-16 w-16 text-cosmic-primary mx-auto animate-pulse" />
+            <Typography variant="h4" color="white" className="mt-4">
+              Loading Space Academy...
+            </Typography>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cosmic-container relative min-h-screen">
       {/* Animated background elements */}
@@ -269,11 +326,9 @@ export function StudyPage() {
       </div>
       
       <div className="pt-28 pb-12 relative z-10">
-        <PageTitle title="Space Academy" className="mb-8">
-          <div className="text-cosmic-text-secondary">
-            Structured learning paths to master cosmic knowledge
-          </div>
-        </PageTitle>
+        <CustomPageTitle title="Space Academy">
+          Structured learning paths to master cosmic knowledge
+        </CustomPageTitle>
         
         {/* User progress banner */}
         {gameData && (

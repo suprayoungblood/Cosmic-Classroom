@@ -15,30 +15,38 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get current user from localStorage
+    // Get current user from localStorage, with fallback
     const currentUser = getCurrentUser();
+
+    // If we have a user in localStorage, set it and fetch history
     if (currentUser) {
       setUser(currentUser);
-    }
-
-    // Fetch question history if user is logged in
-    const fetchQuestionHistory = async () => {
-      try {
-        const history = await getQuestionHistory();
-        setQuestionHistory(history);
-      } catch (error) {
-        console.error("Error fetching question history:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (currentUser) {
-      fetchQuestionHistory();
+      fetchQuestionHistorySafely();
     } else {
+      // No user in localStorage, don't fetch history
       setLoading(false);
     }
   }, []);
+  
+  // Safely fetch question history
+  const fetchQuestionHistorySafely = async () => {
+    try {
+      setLoading(true);
+      // Add a longer delay to prevent API hammering
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Fetch question history with robust error handling
+      const history = await getQuestionHistory();
+      
+      // Set history (will be empty array if API failed)
+      setQuestionHistory(history || []);
+    } catch (error) {
+      console.error("Error fetching question history:", error);
+      setQuestionHistory([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNewQuestion = (question, answer) => {
     // Add new question to history (optimistically)
@@ -72,8 +80,8 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-cosmic-background text-cosmic-text pb-20">
-      {/* Hero section with personalized greeting */}
-      <div className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-cosmic-primary/10 to-transparent">
+      {/* Hero section with personalized greeting - added more top padding */}
+      <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-cosmic-primary/10 to-transparent mt-12">
         <div className="cosmic-stars opacity-20"></div>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
@@ -152,7 +160,15 @@ export function Dashboard() {
 
         <div className="mt-8">
           {activeTab === "profile" && (
-            <CosmicProfile user={user} onProfileUpdate={handleProfileUpdate} />
+            <div className="w-full">
+              {user ? (
+                <CosmicProfile user={user} onProfileUpdate={handleProfileUpdate} />
+              ) : (
+                <div className="text-center p-10 bg-cosmic-background/30 border border-cosmic-border rounded-xl">
+                  <p className="text-lg text-cosmic-text-secondary">Loading user profile...</p>
+                </div>
+              )}
+            </div>
           )}
           {activeTab === "explore" && (
             <CosmicQA user={user} onNewQuestion={handleNewQuestion} />

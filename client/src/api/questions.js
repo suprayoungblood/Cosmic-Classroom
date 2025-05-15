@@ -142,33 +142,67 @@ export const askAuthenticatedQuestion = async (question) => {
 
 /**
  * Get question history for authenticated user
- * @returns {Promise} - Response from API
+ * @returns {Promise} - Response from API or fallback data
  */
 export const getQuestionHistory = async () => {
   try {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      throw new Error('Not authenticated');
+      console.warn('Not authenticated - returning empty question history');
+      return []; // Return empty array instead of throwing
     }
 
-    const response = await fetch(`${API_URL}/questions/history`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // Add a short delay to avoid rate limits
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const data = await response.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to get question history');
+    try {
+      const response = await fetch(`${API_URL}/questions/history`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      // First try to get the response text
+      const text = await response.text();
+      
+      // Handle empty responses
+      if (!text) {
+        console.warn('Empty response from history API');
+        return []; // Return empty array for empty responses
+      }
+      
+      // Try to parse the JSON
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Error parsing question history JSON:', e);
+        return []; // Return empty array for parse errors
+      }
+
+      // Check for error responses but don't throw
+      if (!response.ok) {
+        console.warn('Question history API returned error:', data.message || 'Unknown error');
+        return []; // Return empty array for API errors
+      }
+
+      return data;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error('Fetch error in question history:', fetchError);
+      return []; // Return empty array for fetch errors
     }
-
-    return data;
   } catch (error) {
     console.error('Get question history error:', error);
-    throw error;
+    return []; // Return empty array for any other errors
   }
 };

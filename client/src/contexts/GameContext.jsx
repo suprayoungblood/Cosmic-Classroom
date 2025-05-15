@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { getGameProfile, updateDailyStreak } from '../api/game';
 import confetti from 'canvas-confetti';
@@ -23,32 +23,101 @@ export function GameProvider({ children }) {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [xpAnimation, setXpAnimation] = useState({ show: false, amount: 0 });
 
-  // Fetch game data when user logs in
+  // Fetch game data when user logs in, with reduced frequency and enhanced rate limiting
+  // Track if component is mounted to prevent state updates after unmount
+  const isMountedRef = useRef(true);
+  const requestCountRef = useRef(0);
+  const maxRequestsPerMinute = 3; // Reduced max requests to avoid rate limiting
+  const dataRefreshTimeoutRef = useRef(null);
+  const lastRequestTimeRef = useRef(0); // Track time of last request
+
+  useEffect(() => {
+    // Set isMountedRef to true when component mounts
+    isMountedRef.current = true;
+    
+    // Clean up function to prevent state updates after unmount
+    return () => {
+      isMountedRef.current = false;
+      if (dataRefreshTimeoutRef.current) {
+        clearTimeout(dataRefreshTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Use a simplified approach that won't throw errors
+      // Reset request count periodically (every minute)
+      const resetRequestCount = () => {
+        requestCountRef.current = 0;
+      };
+      const resetInterval = setInterval(resetRequestCount, 60000);
+      
+      // Use a robust approach that prevents excessive API calls and manages state properly
       const loadGameData = async () => {
         try {
-          setLoading(true);
-          
-          // Try to fetch game data (will set defaults internally if it fails)
-          await fetchGameData();
-          
-          // Then try to update streak (won't throw due to internal handling)
-          await updateUserStreak();
-          
+          // Only update state if component is still mounted
+          if (isMountedRef.current) {
+            setLoading(true);
+            
+            // Always set default data immediately to prevent UI flicker
+            setDefaultGameData();
+            
+            // Check if demo mode is active - if so, skip API calls entirely
+            if (localStorage.getItem('demo_mode') === 'true') {
+              console.log('Demo mode active - using default game data without API calls');
+              setLoading(false);
+              return;
+            }
+            
+            // Check if we're rate limited
+            if (localStorage.getItem('is_rate_limited') === 'true') {
+              console.log('Rate limiting in effect - using default data');
+              setLoading(false);
+              return;
+            }
+            
+            // Check if we've made too many requests and delay if needed
+            if (requestCountRef.current >= maxRequestsPerMinute) {
+              console.log('Rate limiting ourselves to prevent 429 errors');
+              setLoading(false);
+              return;
+            }
+            
+            // Count this request
+            requestCountRef.current += 1;
+            
+            // Try to fetch game data (will use defaults internally if it fails)
+            if (isMountedRef.current) {
+              await fetchGameData();
+            }
+          }
         } catch (err) {
           console.error('Unexpected error in game data loading:', err);
-          // This code should never execute due to error handling in called functions
-          setDefaultGameData();
+          
+          // Only update state if component is still mounted
+          if (isMountedRef.current) {
+            setDefaultGameData();
+          }
         } finally {
-          setLoading(false);
+          // Only update state if component is still mounted
+          if (isMountedRef.current) {
+            setLoading(false);
+          }
         }
       };
       
-      // Start the async process
-      loadGameData();
+      // Start the async process with a small delay to prevent immediate API call
+      dataRefreshTimeoutRef.current = setTimeout(loadGameData, 2000);
+      
+      // Clean up on component unmount or when deps change
+      return () => {
+        clearInterval(resetInterval);
+        if (dataRefreshTimeoutRef.current) {
+          clearTimeout(dataRefreshTimeoutRef.current);
+        }
+      };
     } else {
+      // Clear game data when user logs out
       setGameData(null);
       setLoading(false);
     }
@@ -100,7 +169,51 @@ export function GameProvider({ children }) {
   const fetchGameData = async () => {
     try {
       setLoading(true);
+      
+      // Check if we're being rate limited
+      if (localStorage.getItem('is_rate_limited') === 'true') {
+        console.log('Currently rate limited, skipping API call and using default data');
+        setDefaultGameData();
+        return;
+      }
+      
+      // If we've made too many API calls recently, use defaults instead
+      if (requestCountRef.current > 2) {
+        console.log(`Limiting API calls: ${requestCountRef.current} requests made recently`);
+        setDefaultGameData();
+        return;
+      }
+      
+      // Enhanced rate limiting based on time between requests
+      const now = Date.now();
+      const timeSinceLastRequest = now - lastRequestTimeRef.current;
+      const minTimeBetweenRequests = 15000; // Increased to 15 seconds to prevent rate limiting
+      
+      if (timeSinceLastRequest < minTimeBetweenRequests) {
+        console.log(`Too soon for API call (${timeSinceLastRequest}ms), using default data`);
+        setDefaultGameData();
+        return;
+      }
+      
+      // Set the timestamp of this request
+      lastRequestTimeRef.current = Date.now();
+      
+      // Increment request counter
+      requestCountRef.current += 1;
+      
+      // Only proceed if component is still mounted
+      if (!isMountedRef.current) {
+        console.log('Component unmounted during backoff, aborting request');
+        return;
+      }
+      
       const data = await getGameProfile();
+      
+      // Only proceed if component is still mounted
+      if (!isMountedRef.current) {
+        console.log('Component unmounted after request, aborting state update');
+        return;
+      }
       
       if (!data) {
         console.warn('No data returned from API, using defaults');
@@ -115,19 +228,43 @@ export function GameProvider({ children }) {
     } catch (error) {
       console.error('Error fetching game data:', error);
       // Don't throw, just set default data
-      setDefaultGameData();
+      if (isMountedRef.current) {
+        setDefaultGameData();
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
   const updateUserStreak = async () => {
     try {
+      // Add rate limiting with similar pattern to fetchGameData
+      const now = Date.now();
+      const timeSinceLastRequest = now - lastRequestTimeRef.current;
+      const minTimeBetweenRequests = 5000; // 5 seconds minimum between different API requests
+      
+      if (timeSinceLastRequest < minTimeBetweenRequests) {
+        const waitTime = minTimeBetweenRequests - timeSinceLastRequest;
+        console.log(`Rate limiting streak update: waiting ${waitTime}ms`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+      
+      // Update last request time
+      lastRequestTimeRef.current = Date.now();
+      
+      // Check if component is still mounted before making request
+      if (!isMountedRef.current) {
+        console.log('Component unmounted before streak update, aborting');
+        return;
+      }
+      
       // This won't throw due to internal handling in the API function
       const streak = await updateDailyStreak();
       
       // Update the streak in current game data if available
-      if (gameData) {
+      if (isMountedRef.current && gameData && streak) {
         setGameData({
           ...gameData,
           dailyStreak: streak

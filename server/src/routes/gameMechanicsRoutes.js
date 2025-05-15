@@ -8,38 +8,34 @@ const GameMechanicsController_1 = __importDefault(require("../controllers/GameMe
 const authMiddleware_1 = require("../middlewares/auth/authMiddleware");
 const router = (0, express_1.Router)();
 // Get user's game profile with fallback
-router.get('/game/profile', (req, res) => {
+router.get('/game/profile', authMiddleware_1.authenticate, (req, res) => {
     try {
-        // First try with authentication
-        (0, authMiddleware_1.authenticate)(req, res, () => {
-            try {
-                GameMechanicsController_1.default.getUserGameProfile(req, res);
-            }
-            catch (error) {
-                console.error('Error in game profile route:', error);
-                // Return fallback data
-                res.json({
-                    level: 'Explorer',
-                    xp: 1200,
-                    levelProgress: 20,
-                    dailyStreak: 1,
-                    questionsAsked: 5,
-                    topicsExplored: 3,
-                    badges: [
-                        { id: 'first_question', name: 'First Contact', icon: '🚀', description: 'Asked your first space question', earned: true },
-                        { id: 'planets_expert', name: 'Planetary Pioneer', icon: '🪐', description: 'Expert in planetary knowledge', earned: true }
-                    ],
-                    earnedBadges: [
-                        { id: 'first_question', name: 'First Contact', icon: '🚀', description: 'Asked your first space question', earned: true }
-                    ],
-                    nextLevel: 'Voyager',
-                    xpToNextLevel: 1200
-                });
-            }
-        });
+        // Check if we have a user (authenticated)
+        if (req.user) {
+            GameMechanicsController_1.default.getUserGameProfile(req, res);
+        } else {
+            // Return fallback data for unauthenticated users
+            res.json({
+                level: 'Explorer',
+                xp: 1200,
+                levelProgress: 20,
+                dailyStreak: 1,
+                questionsAsked: 5,
+                topicsExplored: 3,
+                badges: [
+                    { id: 'first_question', name: 'First Contact', icon: '🚀', description: 'Asked your first space question', earned: true },
+                    { id: 'planets_expert', name: 'Planetary Pioneer', icon: '🪐', description: 'Expert in planetary knowledge', earned: true }
+                ],
+                earnedBadges: [
+                    { id: 'first_question', name: 'First Contact', icon: '🚀', description: 'Asked your first space question', earned: true }
+                ],
+                nextLevel: 'Voyager',
+                xpToNextLevel: 1200
+            });
+        }
     }
     catch (error) {
-        console.error('Authentication error in game profile route:', error);
+        console.error('Error in game profile route:', error);
         // Return fallback data
         res.json({
             level: 'Explorer',
@@ -61,21 +57,18 @@ router.get('/game/profile', (req, res) => {
     }
 });
 // Update user's daily streak with fallback
-router.post('/game/streak', (req, res) => {
+router.post('/game/streak', authMiddleware_1.authenticate, (req, res) => {
     try {
-        (0, authMiddleware_1.authenticate)(req, res, () => {
-            try {
-                GameMechanicsController_1.default.updateDailyStreak(req, res);
-            }
-            catch (error) {
-                console.error('Error in streak route:', error);
-                // Return fallback data
-                res.json({ streak: 1 });
-            }
-        });
+        // Check if we have a user (authenticated)
+        if (req.user) {
+            GameMechanicsController_1.default.updateDailyStreak(req, res);
+        } else {
+            // Return fallback data for unauthenticated users
+            res.json({ streak: 1 });
+        }
     }
     catch (error) {
-        console.error('Authentication error in streak route:', error);
+        console.error('Error in streak route:', error);
         // Return fallback data
         res.json({ streak: 1 });
     }

@@ -242,19 +242,29 @@ export function SignIn() {
                 type="button"
                 className="w-full bg-cosmic-surface hover:bg-cosmic-surface/80 text-cosmic-text-primary py-2.5 rounded-lg border border-cosmic-border/50 transition-all"
                 onClick={() => {
-                  // Create mock user data for demo
+                  // Flag that we're in demo mode to avoid server calls
+                  localStorage.setItem('demo_mode', 'true');
+                  
+                  // Create a safer mock user for demo without hitting the server
                   const mockUser = {
                     id: 1,
                     username: "space_explorer",
                     email: "demo@cosmiclassroom.com",
                     firstName: "Demo",
                     lastName: "User",
-                    role: "student",
-                    token: "demo-token-12345"
+                    role: "student"
                   };
                   
-                  // Log in with mock data
-                  login(mockUser, mockUser.token);
+                  // Set a demo token in a way that works without hitting the API
+                  localStorage.setItem('demo_user', JSON.stringify(mockUser));
+                  
+                  // Simulate login without token validation (bypass the API)
+                  login(mockUser, "DEMO_MODE_NO_API");
+                  
+                  // Tell the game context to use demo data
+                  localStorage.setItem('use_demo_game_data', 'true');
+                  
+                  // Navigate to dashboard
                   navigate('/dashboard');
                 }}
               >

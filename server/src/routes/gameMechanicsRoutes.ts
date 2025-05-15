@@ -4,8 +4,31 @@ import { authenticate } from '../middlewares/auth/authMiddleware';
 
 const router = Router();
 
-// Get user's game profile with fallback
+// Get user's game profile with fallback and rate limiting
+const profileRequestCounts = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute in milliseconds  
+const RATE_LIMIT_MAX = 10; // Maximum requests per minute
+
 router.get('/game/profile', (req, res) => {
+  // Get client IP for rate limiting
+  const clientIp = req.ip || 'unknown';
+  
+  // Check rate limit
+  const now = Date.now();
+  const clientRequests = profileRequestCounts.get(clientIp) || [];
+  
+  // Filter out requests older than the window
+  const recentRequests = clientRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
+  
+  // If too many requests, send 429 Too Many Requests
+  if (recentRequests.length >= RATE_LIMIT_MAX) {
+    console.warn(`Rate limit exceeded for ${clientIp}`);
+    return res.status(429).send('Too many requests, please try again later.');
+  }
+  
+  // Update request count
+  profileRequestCounts.set(clientIp, [...recentRequests, now]);
+  
   try {
     // First try with authentication
     authenticate(req, res, () => {

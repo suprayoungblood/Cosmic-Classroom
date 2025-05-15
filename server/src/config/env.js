@@ -16,7 +16,7 @@ exports.ENV = {
     DB_HOST: process.env.DB_HOST || 'localhost',
     DB_PORT: parseInt(process.env.DB_PORT || '5432', 10),
     DB_DIALECT: 'postgres',
-    JWT_SECRET: process.env.JWT_SECRET || 'default-jwt-secret-for-development',
+    JWT_SECRET: process.env.JWT_SECRET || 'cosmic-classroom-dev-secret-key-2025-04-05',
     NODE_ENV: process.env.NODE_ENV || 'development'
 };
 // Only warn in development, don't throw error

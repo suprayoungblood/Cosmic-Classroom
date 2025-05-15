@@ -157,6 +157,16 @@
     @apply text-transparent bg-clip-text bg-cosmic-gradient;
   }
   
+  /* Text shadow for better readability on varied backgrounds */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Stronger text shadow for headers on dark backgrounds */
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
   /* Animations */
   .animate-float {
     animation: floating 6s ease-in-out infinite;
@@ -247,21 +257,49 @@
   opacity: 0.8;
 }
 
-/* Override any element that might prevent scrolling */
-.fixed, 
-[data-overlayscrollbars-initialize], 
-[data-overlayscrollbars] {
-  position: absolute !important;
+/* Fix scrolling and z-index issues */
+:root {
+  overflow-x: hidden;
 }
 
-.fixed.inset-0 {
+/* Don't interfere with fixed positioning except where needed */
+.fixed.nav-fix {
+  position: relative !important;
+}
+
+/* Ensure navbar stays above everything else */
+nav.fixed.top-0.left-0.w-full.z-50 {
   position: fixed !important;
-  z-index: 50;
+}
+
+/* Make sure all z-50 fixed elements get fixed positioning */
+.fixed.inset-0.z-50 {
+  position: fixed !important;
+}
+
+/* Fix pointer events issues with z-index layering */
+.z-50 {
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+.z-[9999], 
+[style*="z-index: 9999"] {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
 }
 
 /* Ensure overflow is not hidden */
-body:has(.overflow-hidden) {
+html, body {
   overflow: auto !important;
+  height: auto !important;
+}
+
+/* Fix issues with the study page specifically */
+.cosmic-container {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Keyframes */

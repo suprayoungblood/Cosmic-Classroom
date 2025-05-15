@@ -33,7 +33,7 @@ export function Navbar({ brandName, routes, action }) {
   return (
     <>
       {/* Main navbar */}
-      <nav className="bg-[#0D1117] bg-opacity-95 border-b border-gray-800 fixed top-0 left-0 w-full z-50">
+      <nav style={{position: 'fixed', zIndex: 9999}} className="bg-[#0D1117] bg-opacity-95 border-b border-gray-800 fixed top-0 left-0 w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -91,14 +91,17 @@ export function Navbar({ brandName, routes, action }) {
             </div>
 
             {/* Right side items */}
-            <div className="hidden md:flex md:items-center md:space-x-3">
+            <div className="hidden md:flex md:items-center md:space-x-3" style={{ zIndex: 9999 }}>
               {isAuthenticated ? (
                 <>
-                  <UserProgressBar />
+                  <div style={{ position: 'relative', zIndex: 9999 }}>
+                    <UserProgressBar />
+                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm"
                     className="text-gray-300 hover:text-white"
+                    style={{ position: 'relative', zIndex: 9999 }}
                     onClick={() => {
                       logout();
                       navigate('/home');
