@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
 
   // Show loading state while checking authentication
@@ -24,7 +24,23 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
-  // Render children if authenticated
+  // Check for role requirements if specified
+  if (requiredRole && user?.role !== requiredRole) {
+    // Special case for educators who can access student resources
+    if (requiredRole === 'student' && user?.role === 'educator') {
+      return children;
+    }
+    
+    // Special case for admins who can access all resources
+    if (user?.role === 'admin') {
+      return children;
+    }
+    
+    // Otherwise redirect to dashboard if they don't have the required role
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Render children if authenticated with correct role
   return children;
 };
 

@@ -18,12 +18,38 @@ export function Navbar({ brandName, routes, action }) {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
   
-  // Get only the routes that should be shown in the navbar
-  // Filter out Sign In and Sign Up pages from main navigation
-  const navRoutes = routes.filter(route => 
-    !['Sign In', 'Sign Up'].includes(route.name) && 
-    !(route.requiresAuth && !isAuthenticated)
-  );
+  // Get only the routes that should be shown in the navbar based on user role
+  const navRoutes = routes.filter(route => {
+    // Filter out Sign In and Sign Up pages from main navigation
+    if (['Sign In', 'Sign Up'].includes(route.name)) return false;
+    
+    // If route requires auth and user is not authenticated, don't show
+    if (route.requiresAuth && !isAuthenticated) return false;
+    
+    // For admin and educator, show only role-specific pages
+    if (user?.role === 'admin') {
+      // Admins only see Admin Dashboard and Educator Dashboard
+      return ['Admin Dashboard', 'Educator Dashboard'].includes(route.name);
+    }
+    
+    if (user?.role === 'educator') {
+      // Educators only see Educator Dashboard
+      return ['Educator Dashboard'].includes(route.name);
+    }
+    
+    // For students, filter out admin and educator pages
+    if (user?.role === 'student' && route.allowedRoles) {
+      // Only show if student is in allowed roles
+      return route.allowedRoles.includes('student');
+    }
+    
+    // For non-authenticated users, show only public routes
+    if (!isAuthenticated) {
+      return !route.requiresAuth;
+    }
+    
+    return true;
+  });
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -94,9 +120,24 @@ export function Navbar({ brandName, routes, action }) {
             <div className="hidden md:flex md:items-center md:space-x-3" style={{ zIndex: 9999 }}>
               {isAuthenticated ? (
                 <>
-                  <div style={{ position: 'relative', zIndex: 9999 }}>
-                    <UserProgressBar />
-                  </div>
+                  {/* Only show progress bar for students */}
+                  {user?.role === "student" && (
+                    <div style={{ position: 'relative', zIndex: 9999 }}>
+                      <UserProgressBar />
+                    </div>
+                  )}
+                  
+                  {/* For educators and admins, show their role */}
+                  {(user?.role === "educator" || user?.role === "admin") && (
+                    <div className="px-3 py-1 rounded-md text-sm font-medium flex items-center">
+                      <span className={`px-2 py-1 rounded text-xs text-white inline-block ${
+                        user.role === 'admin' ? 'bg-red-500' : 'bg-cosmic-primary'
+                      }`}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    </div>
+                  )}
+                  
                   <Button 
                     variant="ghost" 
                     size="sm"

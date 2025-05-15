@@ -8,9 +8,11 @@ import GameNotifications from "./components/game/GameNotifications";
 
 function AppContent() {
   const { pathname } = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  // Filter routes based on authentication state
+  console.log("Current user in AppContent:", user); // Debug logging
+  
+  // Filter routes based on authentication state and user role
   const navbarRoutes = routes.filter(route => {
     // Hide Dashboard for non-authenticated users
     if (!isAuthenticated && route.path === '/dashboard') {
@@ -20,6 +22,15 @@ function AppContent() {
     if (isAuthenticated && (route.path === '/sign-in' || route.path === '/sign-up')) {
       return false;
     }
+    
+    // Role-based filtering
+    if (route.allowedRoles && user) {
+      console.log(`Checking route ${route.name} with allowed roles:`, route.allowedRoles); 
+      console.log(`User role:`, user.role);
+      // Only show routes that match the user's role
+      return route.allowedRoles.includes(user.role);
+    }
+    
     // Only show routes with icons in the navbar
     return route.icon !== undefined;
   });
@@ -32,18 +43,18 @@ function AppContent() {
         </div>
       )}
       
-      {/* Global game notifications */}
-      {isAuthenticated && <GameNotifications />}
+      {/* Global game notifications - only for students */}
+      {isAuthenticated && user?.role === "student" && <GameNotifications />}
       
       <Routes>
-        {routes.map(({ path, element, requiresAuth }, key) => {
+        {routes.map(({ path, element, requiresAuth, allowedRoles }, key) => {
           // For protected routes
           if (requiresAuth) {
             return (
               <Route
                 key={key}
                 path={path}
-                element={<ProtectedRoute>{element}</ProtectedRoute>}
+                element={<ProtectedRoute requiredRole={allowedRoles ? allowedRoles[0] : undefined}>{element}</ProtectedRoute>}
               />
             );
           }

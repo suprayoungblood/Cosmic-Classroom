@@ -237,44 +237,93 @@ export function SignIn() {
                 </div>
               </div>
 
-              {/* Demo Button */}
-              <Button 
-                type="button"
-                className="w-full bg-cosmic-surface hover:bg-cosmic-surface/80 text-cosmic-text-primary py-2.5 rounded-lg border border-cosmic-border/50 transition-all"
-                onClick={() => {
-                  // Flag that we're in demo mode to avoid server calls
-                  localStorage.setItem('demo_mode', 'true');
-                  
-                  // Create a safer mock user for demo without hitting the server
-                  const mockUser = {
-                    id: 1,
-                    username: "space_explorer",
-                    email: "demo@cosmiclassroom.com",
-                    firstName: "Demo",
-                    lastName: "User",
-                    role: "student"
-                  };
-                  
-                  // Set a demo token in a way that works without hitting the API
-                  localStorage.setItem('demo_user', JSON.stringify(mockUser));
-                  
-                  // Simulate login without token validation (bypass the API)
-                  login(mockUser, "DEMO_MODE_NO_API");
-                  
-                  // Tell the game context to use demo data
-                  localStorage.setItem('use_demo_game_data', 'true');
-                  
-                  // Navigate to dashboard
-                  navigate('/dashboard');
-                }}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5 text-cosmic-primary" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM5.7 7.3A.7.7 0 016.3 6h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7zm0 3.8a.7.7 0 01.6-.7h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7zm0 3.8a.7.7 0 01.6-.7h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7z" />
-                  </svg>
-                  Demo Login
-                </span>
-              </Button>
+              {/* Demo Buttons for Different Roles */}
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  type="button"
+                  className="w-full bg-cosmic-surface hover:bg-cosmic-surface/80 text-cosmic-text-primary py-2.5 rounded-lg border border-cosmic-border/50 transition-all"
+                  onClick={() => {
+                    // Flag that we're in demo mode to avoid server calls
+                    localStorage.setItem('demo_mode', 'true');
+                    
+                    // Create a mock student user
+                    const mockUser = {
+                      id: 1,
+                      username: "space_explorer",
+                      email: "student@cosmiclassroom.com",
+                      firstName: "Student",
+                      lastName: "User",
+                      role: "student"
+                    };
+                    
+                    localStorage.setItem('demo_user', JSON.stringify(mockUser));
+                    login(mockUser, "DEMO_MODE_NO_API");
+                    localStorage.setItem('use_demo_game_data', 'true');
+                    navigate('/dashboard');
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 text-cosmic-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM5.7 7.3A.7.7 0 016.3 6h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7zm0 3.8a.7.7 0 01.6-.7h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7zm0 3.8a.7.7 0 01.6-.7h7.4a.7.7 0 110 1.4H6.3a.7.7 0 01-.6-.7z" />
+                    </svg>
+                    Student Demo
+                  </span>
+                </Button>
+                
+                <Button 
+                  type="button"
+                  className="w-full bg-cosmic-surface hover:bg-cosmic-surface/80 text-cosmic-text-primary py-2.5 rounded-lg border border-cosmic-border/50 transition-all"
+                  onClick={() => {
+                    localStorage.setItem('demo_mode', 'true');
+                    const mockUser = {
+                      id: 2,
+                      username: "space_teacher",
+                      email: "educator@cosmiclassroom.com",
+                      firstName: "Educator",
+                      lastName: "User",
+                      role: "educator"
+                    };
+                    localStorage.setItem('demo_user', JSON.stringify(mockUser));
+                    login(mockUser, "DEMO_MODE_NO_API");
+                    localStorage.setItem('use_demo_game_data', 'true');
+                    navigate('/dashboard');
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 text-cosmic-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                    Educator Demo
+                  </span>
+                </Button>
+                
+                <Button 
+                  type="button"
+                  className="w-full bg-cosmic-surface hover:bg-cosmic-surface/80 text-cosmic-text-primary py-2.5 rounded-lg border border-cosmic-border/50 transition-all"
+                  onClick={() => {
+                    localStorage.setItem('demo_mode', 'true');
+                    const mockUser = {
+                      id: 3,
+                      username: "space_admin",
+                      email: "admin@cosmiclassroom.com",
+                      firstName: "Admin",
+                      lastName: "User",
+                      role: "admin"
+                    };
+                    localStorage.setItem('demo_user', JSON.stringify(mockUser));
+                    login(mockUser, "DEMO_MODE_NO_API");
+                    localStorage.setItem('use_demo_game_data', 'true');
+                    navigate('/dashboard');
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 text-cosmic-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                    </svg>
+                    Admin Demo
+                  </span>
+                </Button>
+              </div>
 
               <div className="text-center mt-6">
                 <Typography variant="small" className="text-cosmic-text-secondary">

@@ -59,7 +59,27 @@ export function AuthProvider({ children }) {
     }
     
     try {
-      // Validate the token structure first
+      // Special case for demo mode
+      if (token === "DEMO_MODE_NO_API") {
+        console.log("Demo mode login with user data:", userData);
+        
+        // Clear any existing data first
+        localStorage.clear();
+        
+        // Store demo auth data
+        localStorage.setItem('demo_mode', 'true');
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('demo_user', JSON.stringify(userData));
+        localStorage.setItem('authTimestamp', Date.now().toString());
+        
+        setIsAuthenticated(true);
+        setUser(userData);
+        setAuthError(null);
+        return;
+      }
+      
+      // Regular token validation for non-demo mode
       const parts = token.split('.');
       if (parts.length !== 3) {
         setAuthError('Invalid token format');
