@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # Test database service
+  test-db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cosmic_classroom_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Server test runner
+  server-test:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=test-db
+      - DB_NAME=cosmic_classroom_test
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - JWT_SECRET=test-jwt-secret-key
+      - OPENAI_API_KEY=test-api-key
+    depends_on:
+      test-db:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm test
+    networks:
+      - test-network
+
+  # Client test runner
+  client-test:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run test:run
+    networks:
+      - test-network
+
+  # Server test with watch mode
+  server-test-watch:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=test-db
+      - DB_NAME=cosmic_classroom_test
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - JWT_SECRET=test-jwt-secret-key
+      - OPENAI_API_KEY=test-api-key
+    depends_on:
+      test-db:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm run test:watch
+    stdin_open: true
+    tty: true
+    networks:
+      - test-network
+
+  # Client test with UI
+  client-test-ui:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+    ports:
+      - "51204:51204"  # Vitest UI port
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run test:ui -- --host 0.0.0.0
+    stdin_open: true
+    tty: true
+    networks:
+      - test-network
+
+  # Server coverage report
+  server-coverage:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=test-db
+      - DB_NAME=cosmic_classroom_test
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - JWT_SECRET=test-jwt-secret-key
+      - OPENAI_API_KEY=test-api-key
+    depends_on:
+      test-db:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - ./server/coverage:/app/coverage
+    command: npm run test:coverage
+    networks:
+      - test-network
+
+  # Client coverage report
+  client-coverage:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - ./client/coverage:/app/coverage
+    command: npm run test:coverage
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge

@@ -75,6 +75,35 @@ app.get('/api/status', (req, res) => {
   }
 });
 
+// Health check endpoint for Docker and monitoring
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check database connection
+    let dbStatus = 'disconnected';
+    try {
+      await sequelize.authenticate();
+      dbStatus = 'connected';
+    } catch (error) {
+      dbStatus = 'error';
+    }
+
+    res.json({
+      status: 'healthy',
+      timestamp: new Date(),
+      uptime: process.uptime(),
+      environment: ENV.NODE_ENV,
+      database: dbStatus,
+      version: process.env.npm_package_version || '1.0.0'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date(),
+      error: error.message
+    });
+  }
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', questionRoutes);
